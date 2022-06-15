@@ -35,4 +35,5 @@ contract PlayerHero is ERC721,  Ownable{
         require(msg.value == mintCost, string(abi.encodePacked("mintCost not paid. mintCost: ", mintCost.toString(), " wei")));
         _mint(to, tokenId);
     }
+
 }
