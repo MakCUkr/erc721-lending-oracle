@@ -23,7 +23,7 @@ describe("Greeter", function () {
 });
 
 
-describe("Player Hero", function () {
+describe("Testing Contracts", function () {
   it("Should mint an NFT and assign base Uri", async function () {
     const [owner, addr1] = await ethers.getSigners();
 
@@ -40,6 +40,20 @@ describe("Player Hero", function () {
     expect(await playerHero.tokenURI(1)).to.equal(uriErc721+"1");
   });
 
+  it("Lending Oracle deployment", async function () {
+    const [owner, addr1] = await ethers.getSigners();
 
+    const LendingOracle = await ethers.getContractFactory("LendingOracle");
+    const lendingOracle = await LendingOracle.deploy();
+    await lendingOracle.deployed();
+
+    expect(await playerHero.owner()).to.equal(owner.address);
+
+    const setBaseUriTxn = await playerHero.setBaseUri(uriErc721);
+    // wait until the transaction is mined
+    await setBaseUriTxn.wait();
+    const mintTokenIdTxn = await playerHero.connect(addr1).mint(addr1.address, 1, {value: ethers.utils.parseEther("0.1")})
+    expect(await playerHero.tokenURI(1)).to.equal(uriErc721+"1");
+  });
   
 });
