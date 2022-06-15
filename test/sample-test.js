@@ -23,8 +23,7 @@ describe("Testing Contracts", function () {
     2. lendingOracle is the deployed LendingOracle contract
     3. nft1Owner owns the nft with tokenId 
     4. nft1Owner has a lednign agreement to rent his Nft to nft1Renter
-
-
+    5. token id 1 is in our oracle and is rented to nftowner2 for 10k blocks
   */
 
 
