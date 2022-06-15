@@ -1,11 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 import "./libraries/BytesLib.sol";
 import "hardhat/console.sol";
 
-contract LendingOracle is IERC721Receiver{
+
+contract LendingOracle is IERC721Receiver,Context{
     using BytesLib for bytes;
     uint256 constant NULL = 0;
 
@@ -42,6 +45,7 @@ contract LendingOracle is IERC721Receiver{
     function _isCurrentlyRented(address _contractAddress, uint _tokenId) internal view returns(bool){
         if(allAgreements[_contractAddress][_tokenId].deadline == NULL || allAgreements[_contractAddress][_tokenId].deadline < block.timestamp)
             return false;
+        
         return true;
     }
 
@@ -55,7 +59,7 @@ contract LendingOracle is IERC721Receiver{
             - address tokenRenter;
             - uint lendForBlocks
     */
-    function onERC721Received(address operator, address from, uint256 tokenId, bytes calldata data ) public override returns (bytes4) {
+    function onERC721Received(address, address from, uint256 tokenId, bytes calldata data ) public override returns (bytes4) {
         require(data.length > 0 , "bytes.length must be more than 0");
         if(_createLendingAgreement(from,tokenId, data))
             return this.onERC721Received.selector;
@@ -78,10 +82,13 @@ contract LendingOracle is IERC721Receiver{
     {
         // // data: 0x --> 20bytes of contract address --> 20 bytes of token address ==> 64 bytes of _lendForBlocks (because uint64)
         address _contractAddress = data.toAddress(0); 
-        require(_isAnErc721Contract(_contractAddress));
         address _tokenRenter = data.toAddress(20); 
         uint _lendForBlocks = data.toUint256(40);
-        // uint lendForBlocks = 69;
+
+        require(_tokenRenter != address(0), "the token renter can't be the zero address");
+        require(_contractAddress != address(0), "contract address can't be zero address");
+        require(_lendForBlocks > 0, "length of agreement can't be equal to 0 blocks");
+
         uint _deadline = block.timestamp + _lendForBlocks;
 
         LendingAgreement memory agreement = LendingAgreement(
@@ -119,22 +126,62 @@ contract LendingOracle is IERC721Receiver{
         @param lendForBlocks - homonymous
         @return bytes memory
     */
-    function dataEncoder(address _contractAddress, address _tokenRenter, uint _lendForBlocks) public view returns(bytes memory)
+    function dataEncoder(address _contractAddress, address _tokenRenter, uint _lendForBlocks) public pure returns(bytes memory)
     {
         return abi.encodePacked(_contractAddress, _tokenRenter, _lendForBlocks);
     }
 
 
+    /*
+        @desc the function is used for extending the agreement for a certain NFT
+        @param _contractAddress - ERC721 contract address
+        @param _tokenId - homonymous
+        @param _blocksExtended - number of blocks b which the agreement must be extended
+    */
+    function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public{
+        require(allAgreements[_contractAddress][_tokenId].deadline > 0, "Initial lending agreement doesn't exist");
+        require(allAgreements[_contractAddress][_tokenId].deadline < block.timestamp, "Previous agreement not expired");
+        require(_isOwnerOrApproved(_contractAddress, _tokenId), "The msg sender should either be approved or owner of the token" );
+        allAgreements[_contractAddress][_tokenId].deadline = block.timestamp + _blocksExtended;
+    }
 
     /*
-        Returns true if the contract address passed is an implementation of the ERC721 standard. 
-        TBD: logic needs to be written.
+        @desc the function that will be called to transfer the NFT back after the agreement has ended
+        @param _contractAddress - self-explanatory
+        @param _tokenId - self-explanatory
+        Note:  the purpose of "deleting" the agreement is gas refund + gettig rid of the uncertainty in case of new owner after the agreement has ended
     */
-    function _isAnErc721Contract(address _contractAddress) private view returns (bool)
+    function claimNftBack(address _contractAddress, uint _tokenId) public
     {
-        return true;
+        require(_isCurrentlyRented(_contractAddress, _tokenId) == false, "Previous agreement not expired");
+        require(allAgreements[_contractAddress][_tokenId].deadline > 0, "No agreement in place before this");
+        require(_isOwnerOrApproved(_contractAddress, _tokenId), "The msg sender should either be approved or owner of the token");
+        delete allAgreements[_contractAddress][_tokenId] ;
+        ERC721(_contractAddress).safeTransferFrom(address(this), _msgSender(), _tokenId, "");
     }
 
 
+    /*
+        @desc returns true if the msg sender is owner or approved of the token in a secified ERC721 contract address
+    */
+    function _isOwnerOrApproved(address _contractAddress, uint _tokenId) internal view returns (bool)
+    {
+        return _isOwner(_contractAddress, _tokenId) || _isApproved(_contractAddress, _tokenId);
+    }
 
+    /*
+        @desc returns true if the msg sender is owner of the token in a secified ERC721 contract address
+    */
+    function _isOwner(address _contractAddress, uint _tokenId) internal view returns (bool _status)
+    {
+        _status = ERC721(_contractAddress).ownerOf(_tokenId) == _msgSender();
+    }
+
+    /*
+        @desc returns true if the msg sender is approved of the token in a secified ERC721 contract address
+    */
+    function _isApproved(address _contractAddress, uint _tokenId) internal view returns (bool _status)
+    {
+        _status = ERC721(_contractAddress).getApproved(_tokenId) == _msgSender();
+    }
 }
