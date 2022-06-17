@@ -88,7 +88,6 @@ contract LendingOracle is IERC721Receiver,Context{
         require(_tokenRenter != address(0), "the token renter can't be the zero address");
         require(_contractAddress != address(0), "contract address can't be zero address");
         require(_lendForBlocks > 0, "length of agreement can't be equal to 0 blocks");
-
         uint _deadline = block.timestamp + _lendForBlocks;
 
         LendingAgreement memory agreement = LendingAgreement(
@@ -126,8 +125,7 @@ contract LendingOracle is IERC721Receiver,Context{
         @param lendForBlocks - homonymous
         @return bytes memory
     */
-    function dataEncoder(address _contractAddress, address _tokenRenter, uint _lendForBlocks) public pure returns(bytes memory)
-    {
+    function dataEncoder(address _contractAddress, address _tokenRenter, uint _lendForBlocks) public pure returns(bytes memory){
         return abi.encodePacked(_contractAddress, _tokenRenter, _lendForBlocks);
     }
 
@@ -141,7 +139,8 @@ contract LendingOracle is IERC721Receiver,Context{
     function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public{
         require(allAgreements[_contractAddress][_tokenId].deadline > 0, "Initial lending agreement doesn't exist");
         require(allAgreements[_contractAddress][_tokenId].deadline < block.timestamp, "Previous agreement not expired");
-        require(_isOwnerOrApproved(_contractAddress, _tokenId), "The msg sender should either be approved or owner of the token" );
+        require(allAgreements[_contractAddress][_tokenId].tokenLord == _msgSender(), "The msg sender should either be approved or owner of the token" );
+
         allAgreements[_contractAddress][_tokenId].deadline = block.timestamp + _blocksExtended;
     }
 
@@ -155,33 +154,8 @@ contract LendingOracle is IERC721Receiver,Context{
     {
         require(_isCurrentlyRented(_contractAddress, _tokenId) == false, "Previous agreement not expired");
         require(allAgreements[_contractAddress][_tokenId].deadline > 0, "No agreement in place before this");
-        require(_isOwnerOrApproved(_contractAddress, _tokenId), "The msg sender should either be approved or owner of the token");
+        require(allAgreements[_contractAddress][_tokenId].tokenLord == _msgSender(), "The msg sender should either be approved or owner of the token" );
         delete allAgreements[_contractAddress][_tokenId] ;
         ERC721(_contractAddress).safeTransferFrom(address(this), _msgSender(), _tokenId, "");
-    }
-
-
-    /*
-        @desc returns true if the msg sender is owner or approved of the token in a secified ERC721 contract address
-    */
-    function _isOwnerOrApproved(address _contractAddress, uint _tokenId) internal view returns (bool)
-    {
-        return _isOwner(_contractAddress, _tokenId) || _isApproved(_contractAddress, _tokenId);
-    }
-
-    /*
-        @desc returns true if the msg sender is owner of the token in a secified ERC721 contract address
-    */
-    function _isOwner(address _contractAddress, uint _tokenId) internal view returns (bool _status)
-    {
-        _status = ERC721(_contractAddress).ownerOf(_tokenId) == _msgSender();
-    }
-
-    /*
-        @desc returns true if the msg sender is approved of the token in a secified ERC721 contract address
-    */
-    function _isApproved(address _contractAddress, uint _tokenId) internal view returns (bool _status)
-    {
-        _status = ERC721(_contractAddress).getApproved(_tokenId) == _msgSender();
     }
 }

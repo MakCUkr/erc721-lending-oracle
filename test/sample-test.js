@@ -1,5 +1,6 @@
 const { expect, should, assert } = require("chai");
 const { ethers } = require("hardhat");
+require("@nomiclabs/hardhat-ethers");
 
 const nameErc721 = "Thetan Hero";
 const symbolErc721 = "THTN";
@@ -40,7 +41,6 @@ describe("Testing Contracts", function () {
 
     console.log("PlayerHero deployed at: ", playerHero.address);
     console.log("LendingOracle deployed at: ", lendingOracle.address);
-
   })
 
   it("Should mint an NFT and assign base Uri", async function () {
@@ -59,17 +59,17 @@ describe("Testing Contracts", function () {
     const [owner, nft1Owner, nft1Renter] = await ethers.getSigners();
 
     // calling the function in 
-    const returnCallData = await lendingOracle.dataEncoder(playerHero.address, nft1Owner.address, 10000);
+    const returnCallData = await lendingOracle.dataEncoder(playerHero.address, nft1Owner.address, 100);
     expect(returnCallData).to.equal((playerHero.address +
       nft1Owner.address.slice(2) +
-      "0000000000000000000000000000000000000000000000000000000000002710").toLowerCase());
+      "0000000000000000000000000000000000000000000000000000000000000064").toLowerCase());
   });
 
   /* it("encoded data should work to create lending agreements", async function () {
        won't work now since have made the fuction private
      const [owner, nft1Owner, nft1Renter] = await ethers.getSigners();
 
-     const returnCallData = await lendingOracle.dataEncoder(playerHero.address, nft1Renter.address, 10000);
+     const returnCallData = await lendingOracle.dataEncoder(playerHero.address, nft1Renter.address, 100);
      const createAgrTxn = await lendingOracle.connect(nft1Owner)._createLendingAgreement(nft1Owner.address, 1, returnCallData);
      const agreementCreated = await lendingOracle.isCurrentlyRented(playerHero.address, 1);
 
@@ -77,26 +77,55 @@ describe("Testing Contracts", function () {
    })
    */
 
-   it("transferring an NFT with data should create a lending agreement ", async function () {
+  it("transferring an NFT with data should create a lending agreement ", async function () {
     const [owner, nft1Owner, nft1Renter] = await ethers.getSigners();
 
-    const returnCallData = await lendingOracle.dataEncoder(playerHero.address, nft1Renter.address, 10000);
+    const returnCallData = await lendingOracle.dataEncoder(playerHero.address, nft1Renter.address, 100);
     await playerHero.connect(nft1Owner)['safeTransferFrom(address,address,uint256,bytes)'](nft1Owner.address, lendingOracle.address, 1, returnCallData);
     const agreementCreated = await lendingOracle.isCurrentlyRented(playerHero.address, 1);
 
     expect(agreementCreated[0]).to.equal(true);
     expect(agreementCreated[1]).to.equal(nft1Renter.address);
 
-   })
+  })
 
-   it("isCurrentlyRented should return fasle if NFT is not rented ", async function () {
+  it("isCurrentlyRented should return fasle if NFT is not rented ", async function () {
     const [owner, nft1Owner, nft1Renter] = await ethers.getSigners();
 
     const agreementCreated = await lendingOracle.isCurrentlyRented(playerHero.address, 2);
 
     expect(agreementCreated[0]).to.equal(false);
     expect(agreementCreated[1]).to.equal("0x0000000000000000000000000000000000000000");
+  })
 
-   })
+
+  it("Extending the contract should not be possible if the term hasn't expired yet", async function () {
+    const [owner, nft1Owner, nft1Renter] = await ethers.getSigners();
+    try {
+      const agreementExtended = await lendingOracle.connect(nft1Owner).extendAgreement(playerHero.address, 1, 100);
+    }
+    catch (e) {
+      expect(e.toString()).to.
+        equal("Error: VM Exception while processing transaction: reverted with reason string 'Previous agreement not expired'");
+    }
+  })
+
+  it("Extending the contracts should be possible after the term has expired", async function () {
+    const [owner, nft1Owner, nft1Renter] = await ethers.getSigners();
+    // mining 101 blocks to fastforward
+    let x = 101;
+    while (x > 0) { x--;
+      await hre.network.provider.request({
+        method: "evm_mine",
+        params: [],
+      });
+    }        
+
+    const check1 = await lendingOracle.isCurrentlyRented(playerHero.address, 1);
+    expect(check1[0]).to.equal(false);
+    await lendingOracle.connect(nft1Owner).extendAgreement(playerHero.address, 1, 100);
+    const check2 = await lendingOracle.isCurrentlyRented(playerHero.address, 1);
+    expect(check2[0]).to.equal(true);
+  })
 
 });
