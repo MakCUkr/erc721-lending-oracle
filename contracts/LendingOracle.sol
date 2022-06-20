@@ -4,6 +4,8 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 import "./libraries/BytesLib.sol";
 import "hardhat/console.sol";
 
@@ -11,7 +13,7 @@ import "hardhat/console.sol";
 contract LendingOracle is IERC721Receiver,Context{
     using BytesLib for bytes;
     uint256 constant NULL = 0;
-
+    uint feesBps = 100; //100 bps = 1 %
     event LendingAgreementCreated(address contractAddress,uint tokenId,address tokenLord, address tokenRenter,uint deadline);
 
     struct LendingAgreement{
@@ -22,6 +24,15 @@ contract LendingOracle is IERC721Receiver,Context{
         uint deadline;
     }
 
+    struct RewardsAgreement{
+        address tokenLord; 
+        address tokenRenter; 
+        address erc20; 
+        uint amount; 
+        uint ownerRatio;
+    }
+
+    RewardsAgreement[] allRewards;
     mapping(address => mapping(uint=> LendingAgreement)) allAgreements;
 
 
@@ -158,4 +169,31 @@ contract LendingOracle is IERC721Receiver,Context{
         delete allAgreements[_contractAddress][_tokenId] ;
         ERC721(_contractAddress).safeTransferFrom(address(this), _msgSender(), _tokenId, "");
     }
+
+
+    function addERC20Reward(address _tokenLord, address _tokenRenter, address _erc20, uint _amount, uint _ownerRatio) public returns (uint)
+    {
+        allRewards[allRewards.length-1] = RewardsAgreement(_tokenLord, _tokenRenter, _erc20, _amount, _ownerRatio);
+        return (allRewards.length - 1);
+    }
+
+
+    function claimReward(uint _rewardId, bool _isRenter) public
+    {
+        RewardsAgreement memory rewAgrmnt=  allRewards[_rewardId];
+        if(_isRenter){
+            require(rewAgrmnt.tokenRenter == msg.sender, "only the NFT renter can claim the reward back");
+            uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
+            uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
+            uint renterPrize = rewAgrmnt.amount - ownerFees;
+            ERC20(rewAgrmnt.erc20).transfer(address(this), renterPrize);
+        }
+        else{
+            require(rewAgrmnt.tokenLord == msg.sender, "only the NFT owner can claim the reward back");
+            uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
+            uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
+            ERC20(rewAgrmnt.erc20).transfer(address(this), ownerFees);
+        }
+    }
+    
 }

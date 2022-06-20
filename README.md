@@ -4,6 +4,7 @@ Things to do:
 3. ~~function to rent the nft to someone else after the deadline~~
 4. Handling token rewards
 5. A proper README.md
+6. currentOwner function
 
 
 Assumptions made: 
