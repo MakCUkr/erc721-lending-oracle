@@ -8,15 +8,15 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./ILendingOracle.sol";
 import "./IERC20Receiver.sol";
+import "./RewardHandler.sol";
 
 import "./libraries/BytesLib.sol";
 import "hardhat/console.sol";
 
 
-contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle, IERC20Receiver{
+contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle, RewardHandler{
     using BytesLib for bytes;
     uint256 constant NULL = 0;
-    uint feesBps = 100; //100 bps = 1 %
     event LendingAgreementCreated(address contractAddress,uint tokenId,address tokenLord, address tokenRenter,uint deadline);
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
@@ -28,16 +28,6 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
         uint deadline;
     }
 
-    struct RewardsAgreement{
-        address tokenLord; 
-        address tokenRenter; 
-        address erc20; 
-        uint amount; 
-        uint ownerRatio;
-        bool distributed;
-    }
-
-    RewardsAgreement[] allRewards;
     mapping(address => mapping(uint=> LendingAgreement)) allAgreements;
 
 
@@ -96,7 +86,7 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
     */
     function _createLendingAgreement(address _tokenLord, uint _tokenId, bytes calldata data) private returns (bool)
     {
-        // // data: 0x --> 20bytes of contract address --> 20 bytes of token address ==> 64 bytes of _lendForBlocks (because uint64)
+        // data: 0x --> 20bytes of contract address --> 20 bytes of token address ==> 64 bytes of _lendForBlocks (because uint64)
         address _contractAddress = data.toAddress(0); 
         address _tokenRenter = data.toAddress(20); 
         uint _lendForBlocks = data.toUint256(40);
@@ -176,31 +166,6 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
     }
 
 
-    function addERC20Reward(address _tokenLord, address _tokenRenter, address _erc20, uint _amount, uint _ownerRatio) public returns (uint)
-    {
-        allRewards[allRewards.length-1] = RewardsAgreement(_tokenLord, _tokenRenter, _erc20, _amount, _ownerRatio, false);
-        return (allRewards.length - 1);
-    }
-
-
-    function claimReward(uint _rewardId, bool _isRenter) public
-    {
-        RewardsAgreement memory rewAgrmnt=  allRewards[_rewardId];
-        if(_isRenter){
-            require(rewAgrmnt.tokenRenter == msg.sender, "LendingOracle: only the NFT renter can claim the reward back");
-            uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
-            uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
-            uint renterPrize = rewAgrmnt.amount - ownerFees;
-            IERC20(rewAgrmnt.erc20).transfer(address(this), renterPrize);
-        }
-        else{
-            require(rewAgrmnt.tokenLord == msg.sender, "LendingOracle: only the NFT owner can claim the reward back");
-            uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
-            uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
-            IERC20(rewAgrmnt.erc20).transfer(address(this), ownerFees);
-        }
-    }
-    
 
     /**
      * @dev The NFT must be currently rented - see {LendingOracle - isCurrentlyRented}
@@ -223,37 +188,33 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
     }
 
 
-    /**
-     * @dev see {IERC20Receiver-onERC20Received}
-     */
-    function onERC20Received(
-        address from,
-        address to,
-        uint256 amount,
-        bytes calldata data
-    ) external override returns (bytes4){
-        require(data.length > 0 , "LendingOracle: bytes.length must be more than 0");
-
-        address cAddress = tx.origin;
-
-        if(_addRewardAgreement(cAddress,amount, data))
-            return this.onERC721Received.selector;
-        else
-            return bytes4("");
-    }
-
-    /**
-     * @dev will decrypt the calldat transferred
-     * @param cAddress - the contract address of the erc20Rewardable token
-     * @param amount - amount of erc20tokens received
-     * @param data - other calldata being send along with the transfer
-     * @return result - returns true if all the data was passed correctly. returns false otherwise
-     */
-    function _addRewardAgreement(address cAddress, uint amount, bytes calldata data) internal returns (bool result)
+    /*function addERC20Reward(address _tokenLord, address _tokenRenter, address _erc20, uint _amount, uint _ownerRatio) public returns (uint)
     {
+        allRewards[allRewards.length-1] = RewardsAgreement(_tokenLord, _tokenRenter, _erc20, _amount, _ownerRatio, false);
+        return (allRewards.length - 1);
+    }*/
 
 
+    /*
+    function claimReward(uint _rewardId, bool _isRenter) public
+    {
+        RewardsAgreement memory rewAgrmnt=  allRewards[_rewardId];
+        if(_isRenter){
+            require(rewAgrmnt.tokenRenter == msg.sender, "LendingOracle: only the NFT renter can claim the reward back");
+            uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
+            uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
+            uint renterPrize = rewAgrmnt.amount - ownerFees;
+            IERC20(rewAgrmnt.erc20).transfer(address(this), renterPrize);
+        }
+        else{
+            require(rewAgrmnt.tokenLord == msg.sender, "LendingOracle: only the NFT owner can claim the reward back");
+            uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
+            uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
+            IERC20(rewAgrmnt.erc20).transfer(address(this), ownerFees);
+        }
     }
+    */
+    
 
 
 }
