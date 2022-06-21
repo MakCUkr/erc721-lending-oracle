@@ -20,29 +20,7 @@ describe("Greeter", function () {
 });
 
 
-describe( "ERC20basicTests" , function(){
-  let erc20R;
-
-  before(async function () {
-    const [owner, addr1, addr2, addr3] = await ethers.getSigners();
-    const ERC20Rewardable = await ethers.getContractFactory("ERC20Rewardable.sol");
-    erc20R = await ERC20Rewardable.deploy(nameErc20, symbolErc20);
-    console.log("ERC20Rewardable deployed at: ", erc20R.address);
-  })
-
-  it("mint and safetransfer works", async function(){
-      const [owner, addr1, addr2, addr3] = await ethers.getSigners();
-      await erc20R.connect(addr1).mint(addr1, ethers.utils.parseEther("1", "ether"));
-      const bal1 = await erc20R.balanceOf(addr1);
-      expect(bal1).to.equal(ethers.utils.parseEther("1", "ether"));
-
-      await erc20R.connect(addr1).transfer(a)
-  });
-
-});
-
-
-describe("Testing Contracts", function () {
+describe("NFT Lending in Oracle", function () {
   /*
     The state of the chain after all the tests are run:
     1. playerHero is the deployed PlayerHero contract
@@ -64,12 +42,9 @@ describe("Testing Contracts", function () {
     const LendingOracle = await ethers.getContractFactory("LendingOracle");
     lendingOracle = await LendingOracle.deploy();
     await lendingOracle.deployed();
-    const ERC20Rewardable = await ethers.getContractFactory("ERC20Rewardable.sol");
-    erc20R = await ERC20Rewardable.deploy(nameErc20, symbolErc20);
 
-    console.log("PlayerHero deployed at: ", playerHero.address);
-    console.log("LendingOracle deployed at: ", lendingOracle.address);
-    console.log("ERC20Rewardable deployed at: ", erc20R.address);
+    // console.log("PlayerHero deployed at: ", playerHero.address);
+    // console.log("LendingOracle deployed at: ", lendingOracle.address);
   })
 
   it("Should mint an NFT and assign base Uri", async function () {
@@ -135,7 +110,7 @@ describe("Testing Contracts", function () {
     }
     catch (e) {
       expect(e.toString()).to.
-        equal("Error: VM Exception while processing transaction: reverted with reason string 'Previous agreement not expired'");
+        equal("Error: VM Exception while processing transaction: reverted with reason string 'LendingOracle: Previous agreement not expired'");
     }
   })
 
@@ -156,4 +131,107 @@ describe("Testing Contracts", function () {
     const check2 = await lendingOracle.isCurrentlyRented(playerHero.address, 1);
     expect(check2[0]).to.equal(true);
   })
+});
+
+
+describe( "ERC20 basic tests" , function(){
+  let erc20R;
+
+  before(async function () {
+    const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+    const ERC20Rewardable = await ethers.getContractFactory("ERC20Rewardable");
+    erc20R = await ERC20Rewardable.deploy(nameErc20, symbolErc20);
+  })
+
+  it("mint and safetransfer works", async function(){
+      const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+      await erc20R.connect(addr1).mint(addr1.address, ethers.utils.parseEther("10", "ether"));
+      let bal1 = await erc20R.balanceOf(addr1.address);
+      expect(bal1).to.equal(ethers.utils.parseEther("10", "ether"));
+      
+      await erc20R.connect(addr1).safeTransfer(addr2.address, ethers.utils.parseEther("5", "ether"), 0x00);
+      let bal2 = await erc20R.balanceOf(addr2.address);
+      expect(bal2).to.equal(ethers.utils.parseEther("5", "ether"));
+      bal1 = await erc20R.balanceOf(addr1.address);
+      expect(bal1).to.equal(ethers.utils.parseEther("5", "ether"));
+
+      await erc20R.connect(addr2).safeTransfer(addr1.address, ethers.utils.parseEther("5", "ether"), 0x00);
+      bal2 = await erc20R.balanceOf(addr2.address);
+      expect(bal2).to.equal(ethers.utils.parseEther("0", "ether"));
+      bal1 = await erc20R.balanceOf(addr1.address);
+      expect(bal1).to.equal(ethers.utils.parseEther("10", "ether"));
+
+    });
+    
+    it("safeTransferFrom works", async function(){
+    const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+      await erc20R.connect(addr1).approve(addr3.address, ethers.utils.parseEther("100", "ether"));
+      await erc20R.connect(addr3).safeTransferFrom(addr1.address, addr2.address,  ethers.utils.parseEther("3", "ether"), 0x00);
+      let bal2 = await erc20R.balanceOf(addr2.address);
+      expect(bal2).to.equal(ethers.utils.parseEther("3", "ether"));
+      let bal1 = await erc20R.balanceOf(addr1.address);
+      expect(bal1).to.equal(ethers.utils.parseEther("7", "ether"));
+      let bal3 = await erc20R.balanceOf(addr3.address);
+      expect(bal3).to.equal(ethers.utils.parseEther("0", "ether"));
+    });
+
+    it("safeMint works", async function(){
+        const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+        await erc20R.connect(addr3).safeMint(addr3.address, ethers.utils.parseEther("100", "ether"), 0x00);
+        let bal3 = await erc20R.balanceOf(addr3.address);
+        expect(bal3).to.equal(ethers.utils.parseEther("100", "ether"));
+    });
+
+});
+
+
+
+describe( "Handlin token rewards" , function(){
+  let erc20R;
+
+  before(async function () {
+    const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+    const ERC20Rewardable = await ethers.getContractFactory("ERC20Rewardable");
+    erc20R = await ERC20Rewardable.deploy(nameErc20, symbolErc20);
+  })
+
+  it("mint and safetransfer works", async function(){
+      const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+      await erc20R.connect(addr1).mint(addr1.address, ethers.utils.parseEther("10", "ether"));
+      let bal1 = await erc20R.balanceOf(addr1.address);
+      expect(bal1).to.equal(ethers.utils.parseEther("10", "ether"));
+      
+      await erc20R.connect(addr1).safeTransfer(addr2.address, ethers.utils.parseEther("5", "ether"), 0x00);
+      let bal2 = await erc20R.balanceOf(addr2.address);
+      expect(bal2).to.equal(ethers.utils.parseEther("5", "ether"));
+      bal1 = await erc20R.balanceOf(addr1.address);
+      expect(bal1).to.equal(ethers.utils.parseEther("5", "ether"));
+
+      await erc20R.connect(addr2).safeTransfer(addr1.address, ethers.utils.parseEther("5", "ether"), 0x00);
+      bal2 = await erc20R.balanceOf(addr2.address);
+      expect(bal2).to.equal(ethers.utils.parseEther("0", "ether"));
+      bal1 = await erc20R.balanceOf(addr1.address);
+      expect(bal1).to.equal(ethers.utils.parseEther("10", "ether"));
+
+    });
+    
+    it("safeTransferFrom works", async function(){
+    const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+      await erc20R.connect(addr1).approve(addr3.address, ethers.utils.parseEther("100", "ether"));
+      await erc20R.connect(addr3).safeTransferFrom(addr1.address, addr2.address,  ethers.utils.parseEther("3", "ether"), 0x00);
+      let bal2 = await erc20R.balanceOf(addr2.address);
+      expect(bal2).to.equal(ethers.utils.parseEther("3", "ether"));
+      let bal1 = await erc20R.balanceOf(addr1.address);
+      expect(bal1).to.equal(ethers.utils.parseEther("7", "ether"));
+      let bal3 = await erc20R.balanceOf(addr3.address);
+      expect(bal3).to.equal(ethers.utils.parseEther("0", "ether"));
+    });
+
+    it("safeMint works", async function(){
+        const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+        await erc20R.connect(addr3).safeMint(addr3.address, ethers.utils.parseEther("100", "ether"), 0x00);
+        let bal3 = await erc20R.balanceOf(addr3.address);
+        expect(bal3).to.equal(ethers.utils.parseEther("100", "ether"));
+    });
+
 });

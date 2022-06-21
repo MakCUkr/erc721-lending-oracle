@@ -34,6 +34,7 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
         address erc20; 
         uint amount; 
         uint ownerRatio;
+        bool distributed;
     }
 
     RewardsAgreement[] allRewards;
@@ -177,7 +178,7 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
 
     function addERC20Reward(address _tokenLord, address _tokenRenter, address _erc20, uint _amount, uint _ownerRatio) public returns (uint)
     {
-        allRewards[allRewards.length-1] = RewardsAgreement(_tokenLord, _tokenRenter, _erc20, _amount, _ownerRatio);
+        allRewards[allRewards.length-1] = RewardsAgreement(_tokenLord, _tokenRenter, _erc20, _amount, _ownerRatio, false);
         return (allRewards.length - 1);
     }
 
@@ -226,14 +227,33 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
      * @dev see {IERC20Receiver-onERC20Received}
      */
     function onERC20Received(
-        address ,
-        address ,
-        uint256 ,
-        bytes calldata 
-    ) external pure override returns (bytes4){
-        return this.onERC20Received.selector;
+        address from,
+        address to,
+        uint256 amount,
+        bytes calldata data
+    ) external override returns (bytes4){
+        require(data.length > 0 , "LendingOracle: bytes.length must be more than 0");
+
+        address cAddress = tx.origin;
+
+        if(_addRewardAgreement(cAddress,amount, data))
+            return this.onERC721Received.selector;
+        else
+            return bytes4("");
     }
 
+    /**
+     * @dev will decrypt the calldat transferred
+     * @param cAddress - the contract address of the erc20Rewardable token
+     * @param amount - amount of erc20tokens received
+     * @param data - other calldata being send along with the transfer
+     * @return result - returns true if all the data was passed correctly. returns false otherwise
+     */
+    function _addRewardAgreement(address cAddress, uint amount, bytes calldata data) internal returns (bool result)
+    {
+
+
+    }
 
 
 }

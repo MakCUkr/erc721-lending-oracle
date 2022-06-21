@@ -21,6 +21,18 @@ import "@openzeppelin/contracts/utils/Address.sol";
     constructor(string memory name_, string memory symbol_) ERC20(name_, symbol_)
     {}
 
+    /**
+     * See {ERC20Rewardable: _safeTransfer}
+     */
+    function safeTransfer(  
+        address to,
+        uint256 amount, 
+        bytes calldata data
+    ) public {
+        _safeTransfer(to, amount, data);
+    }
+
+
     /*
         @dev A transfer method that also allows to send calldata as a parameter intended for a smart contract
     */
@@ -28,25 +40,38 @@ import "@openzeppelin/contracts/utils/Address.sol";
         address to,
         uint256 amount, 
         bytes calldata data
-    ) public {
+    ) internal virtual {
         address owner = _msgSender();
         _transfer(owner, to, amount);
         require(_checkOnERC20Received(owner, to, amount, data), "ERC20Rewardable: transfer to non ERC20Receiver implementer");
     }
 
+    function safeMint(address to, uint256 amount, bytes calldata data) public
+    {
+        _safeMint(to,amount, data);
+    }
+
     /*
         @dev A mint method that also allows to send calldata as a parameter intended for a smart contract
     */
-    function _safeMint(address to, uint256 amount, bytes calldata data) public
+    function _safeMint(address to, uint256 amount, bytes calldata data) internal
     {
         _mint(to, amount);
         require(_checkOnERC20Received(address(0), to, amount, data), "ERC20Rewardable: transfer to non ERC20Receiver implementer");
     }
 
+    /**
+     * see {ERC20Rewardable-_safeTransferFrom}
+     */
+    function safeTransferFrom(address from, address to, uint amount, bytes calldata data) public
+    {
+        _safeTransferFrom(from, to, amount, data);
+    }
+
     /*
         @dev A transferFrom method that also allows to send calldata as a parameter intended for a smart contract
     */
-    function _safeTransferFrom(address from, address to, uint amount, bytes calldata data) public
+    function _safeTransferFrom(address from, address to, uint amount, bytes calldata data) internal
     {
         transferFrom(from, to,amount);
         require(_checkOnERC20Received(from, to, amount, data), "ERC20Rewardable: transfer to non ERC20Receiver implementer");
@@ -81,5 +106,13 @@ import "@openzeppelin/contracts/utils/Address.sol";
             return true;
         }
     }
+
+    /**
+     * Temporary function to mint tokens for testing 
+     */
+    function mint(address account, uint256 amount) public  {
+        _mint(account, amount);
+    }
+
 
 }
