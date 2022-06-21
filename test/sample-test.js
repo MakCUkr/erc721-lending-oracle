@@ -6,6 +6,9 @@ const nameErc721 = "Thetan Hero";
 const symbolErc721 = "THTN";
 const uriErc721 = "https://antonymnft.s3.us-west-1.amazonaws.com/json/";
 
+const nameErc20 = "GameCoin";
+const symbolErc20 = "GCN";
+
 describe("Greeter", function () {
   it("Should create a greeting", async function () {
     const Greeter = await ethers.getContractFactory("Greeter");
@@ -14,6 +17,28 @@ describe("Greeter", function () {
 
     expect(await greeter.greet()).to.equal("Hello, world!");
   });
+});
+
+
+describe( "ERC20basicTests" , function(){
+  let erc20R;
+
+  before(async function () {
+    const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+    const ERC20Rewardable = await ethers.getContractFactory("ERC20Rewardable.sol");
+    erc20R = await ERC20Rewardable.deploy(nameErc20, symbolErc20);
+    console.log("ERC20Rewardable deployed at: ", erc20R.address);
+  })
+
+  it("mint and safetransfer works", async function(){
+      const [owner, addr1, addr2, addr3] = await ethers.getSigners();
+      await erc20R.connect(addr1).mint(addr1, ethers.utils.parseEther("1", "ether"));
+      const bal1 = await erc20R.balanceOf(addr1);
+      expect(bal1).to.equal(ethers.utils.parseEther("1", "ether"));
+
+      await erc20R.connect(addr1).transfer(a)
+  });
+
 });
 
 
@@ -30,6 +55,7 @@ describe("Testing Contracts", function () {
 
   let playerHero;
   let lendingOracle;
+  let erc20R;
 
   before(async function () {
     const PlayerHero = await ethers.getContractFactory("PlayerHero");
@@ -38,9 +64,12 @@ describe("Testing Contracts", function () {
     const LendingOracle = await ethers.getContractFactory("LendingOracle");
     lendingOracle = await LendingOracle.deploy();
     await lendingOracle.deployed();
+    const ERC20Rewardable = await ethers.getContractFactory("ERC20Rewardable.sol");
+    erc20R = await ERC20Rewardable.deploy(nameErc20, symbolErc20);
 
     console.log("PlayerHero deployed at: ", playerHero.address);
     console.log("LendingOracle deployed at: ", lendingOracle.address);
+    console.log("ERC20Rewardable deployed at: ", erc20R.address);
   })
 
   it("Should mint an NFT and assign base Uri", async function () {
@@ -127,5 +156,4 @@ describe("Testing Contracts", function () {
     const check2 = await lendingOracle.isCurrentlyRented(playerHero.address, 1);
     expect(check2[0]).to.equal(true);
   })
-
 });

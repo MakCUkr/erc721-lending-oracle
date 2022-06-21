@@ -4,9 +4,9 @@
 3. ~~function to rent the nft to someone else after the deadline~~
 4. Handling token rewards
 5. A proper README.md
-6. currentOwner function
+6. ~~currentOwner function~~
 7. need to add events
-8. Create ILendingOracle.sol
+8. ~~Create ILendingOracle.sol~~
 9. Need to add function in Lending oracle to return if this oracle imlpements ILendingOracle.sol. 
 
 Assumptions made: 

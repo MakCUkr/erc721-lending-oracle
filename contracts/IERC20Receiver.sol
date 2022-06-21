@@ -3,7 +3,7 @@ pragma solidity ^0.8.0;
 
 
 interface IERC20Receiver {
-    /**
+    /*
      * @dev Whenever an {IERC20Rewardable} `tokenId` token is transferred to this contract via {ERC20Rewardable-safeTransferFrom}
      * by `operator` from `from`, this function is called.
      *

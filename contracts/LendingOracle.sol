@@ -6,13 +6,14 @@ import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-
+import "./ILendingOracle.sol";
+import "./IERC20Receiver.sol";
 
 import "./libraries/BytesLib.sol";
 import "hardhat/console.sol";
 
 
-contract LendingOracle is IERC721Receiver,Context, AccessControl{
+contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle, IERC20Receiver{
     using BytesLib for bytes;
     uint256 constant NULL = 0;
     uint feesBps = 100; //100 bps = 1 %
@@ -74,7 +75,7 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl{
             - uint lendForBlocks
     */
     function onERC721Received(address, address from, uint256 tokenId, bytes calldata data ) public override returns (bytes4) {
-        require(data.length > 0 , "bytes.length must be more than 0");
+        require(data.length > 0 , "LendingOracle: bytes.length must be more than 0");
         if(_createLendingAgreement(from,tokenId, data))
             return this.onERC721Received.selector;
         else
@@ -99,15 +100,15 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl{
         address _tokenRenter = data.toAddress(20); 
         uint _lendForBlocks = data.toUint256(40);
 
-        require(_tokenRenter != address(0), "the token renter can't be the zero address");
-        require(_contractAddress != address(0), "contract address can't be zero address");
-        require(_lendForBlocks > 0, "length of agreement can't be equal to 0 blocks");
+        require(_tokenRenter != address(0), "LendingOracle: the token renter can't be the zero address");
+        require(_contractAddress != address(0), "LendingOracle: contract address can't be zero address");
+        require(_lendForBlocks > 0, "LendingOracle: length of agreement can't be equal to 0 blocks");
         uint _deadline = block.timestamp + _lendForBlocks;
 
         LendingAgreement memory agreement = LendingAgreement(
             _contractAddress, _tokenId, _tokenLord, _tokenRenter, _deadline);
         
-        require(_addAgreementToMapping(agreement), "_createLendingAgreement: _addAgreement returned false");
+        require(_addAgreementToMapping(agreement), "LendingOracle: _addAgreement returned false");
 
         return true;
     }
@@ -151,9 +152,9 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl{
         @param _blocksExtended - number of blocks b which the agreement must be extended
     */
     function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public{
-        require(allAgreements[_contractAddress][_tokenId].deadline > 0, "Initial lending agreement doesn't exist");
-        require(allAgreements[_contractAddress][_tokenId].deadline < block.timestamp, "Previous agreement not expired");
-        require(allAgreements[_contractAddress][_tokenId].tokenLord == _msgSender(), "The msg sender should either be approved or owner of the token" );
+        require(allAgreements[_contractAddress][_tokenId].deadline > 0, "LendingOracle: Initial lending agreement doesn't exist");
+        require(allAgreements[_contractAddress][_tokenId].deadline < block.timestamp, "LendingOracle: Previous agreement not expired");
+        require(allAgreements[_contractAddress][_tokenId].tokenLord == _msgSender(), "LendingOracle: The msg sender should either be approved or owner of the token" );
 
         allAgreements[_contractAddress][_tokenId].deadline = block.timestamp + _blocksExtended;
     }
@@ -166,9 +167,9 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl{
     */
     function claimNftBack(address _contractAddress, uint _tokenId) public
     {
-        require(_isCurrentlyRented(_contractAddress, _tokenId) == false, "Previous agreement not expired");
-        require(allAgreements[_contractAddress][_tokenId].deadline > 0, "No agreement in place before this");
-        require(allAgreements[_contractAddress][_tokenId].tokenLord == _msgSender(), "The msg sender should either be approved or owner of the token" );
+        require(_isCurrentlyRented(_contractAddress, _tokenId) == false, "LendingOracle: Previous agreement not expired");
+        require(allAgreements[_contractAddress][_tokenId].deadline > 0, "LendingOracle: No agreement in place before this");
+        require(allAgreements[_contractAddress][_tokenId].tokenLord == _msgSender(), "LendingOracle: The msg sender should either be approved or owner of the token" );
         delete allAgreements[_contractAddress][_tokenId] ;
         ERC721(_contractAddress).safeTransferFrom(address(this), _msgSender(), _tokenId, "");
     }
@@ -185,18 +186,54 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl{
     {
         RewardsAgreement memory rewAgrmnt=  allRewards[_rewardId];
         if(_isRenter){
-            require(rewAgrmnt.tokenRenter == msg.sender, "only the NFT renter can claim the reward back");
+            require(rewAgrmnt.tokenRenter == msg.sender, "LendingOracle: only the NFT renter can claim the reward back");
             uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
             uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
             uint renterPrize = rewAgrmnt.amount - ownerFees;
             IERC20(rewAgrmnt.erc20).transfer(address(this), renterPrize);
         }
         else{
-            require(rewAgrmnt.tokenLord == msg.sender, "only the NFT owner can claim the reward back");
+            require(rewAgrmnt.tokenLord == msg.sender, "LendingOracle: only the NFT owner can claim the reward back");
             uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
             uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
             IERC20(rewAgrmnt.erc20).transfer(address(this), ownerFees);
         }
     }
     
+
+    /**
+     * @dev The NFT must be currently rented - see {LendingOracle - isCurrentlyRented}
+     * @return currRenter - the address of the current renter of the NFT
+     */
+    function currentRenter(address _contractAddress, uint _tokenId) public view returns(address currRenter)
+    {
+        require(_isCurrentlyRented(_contractAddress, _tokenId), "LendingOracle: The NFT is not rented currently");
+        currRenter= allAgreements[_contractAddress][_tokenId].tokenRenter; 
+    }
+
+    /**
+     * @dev The NFT must be currently rented - see {LendingOracle - isCurrentlyRented}
+     * @return currOwner - the address of the real owner of the NFT
+     */
+    function realOwner(address _contractAddress, uint _tokenId) public view returns(address currOwner)
+    {
+        require(_isCurrentlyRented(_contractAddress, _tokenId), "LendingOracle: The NFT is not rented currently");
+        currOwner = allAgreements[_contractAddress][_tokenId].tokenLord;
+    }
+
+
+    /**
+     * @dev see {IERC20Receiver-onERC20Received}
+     */
+    function onERC20Received(
+        address ,
+        address ,
+        uint256 ,
+        bytes calldata 
+    ) external pure override returns (bytes4){
+        return this.onERC20Received.selector;
+    }
+
+
+
 }
