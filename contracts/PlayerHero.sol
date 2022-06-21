@@ -5,11 +5,9 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-
-/*
-    ERC721 implementation : https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC721/ERC721.sol
-    The ERC721 contract inherits from the following interfaces: IERC721Metadata
-    The ERC721 contract inherits from the following contracts: Context, ERC165, IERC721
+/**
+  * An example NFT contract which can be issused by games for playing. 
+  * This example contract will be used for testing the LendingOracle.sol contract in  the same repo
 */
 contract PlayerHero is ERC721,  Ownable{
     using Strings for uint256;

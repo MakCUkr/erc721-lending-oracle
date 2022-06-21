@@ -4,17 +4,20 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721Receiver.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
 
 import "./libraries/BytesLib.sol";
 import "hardhat/console.sol";
 
 
-contract LendingOracle is IERC721Receiver,Context{
+contract LendingOracle is IERC721Receiver,Context, AccessControl{
     using BytesLib for bytes;
     uint256 constant NULL = 0;
     uint feesBps = 100; //100 bps = 1 %
     event LendingAgreementCreated(address contractAddress,uint tokenId,address tokenLord, address tokenRenter,uint deadline);
+    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
 
     struct LendingAgreement{
         address contractAddress;
@@ -186,13 +189,13 @@ contract LendingOracle is IERC721Receiver,Context{
             uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
             uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
             uint renterPrize = rewAgrmnt.amount - ownerFees;
-            ERC20(rewAgrmnt.erc20).transfer(address(this), renterPrize);
+            IERC20(rewAgrmnt.erc20).transfer(address(this), renterPrize);
         }
         else{
             require(rewAgrmnt.tokenLord == msg.sender, "only the NFT owner can claim the reward back");
             uint contractFees = (feesBps * rewAgrmnt.amount ) / 10000;
             uint ownerFees = ((rewAgrmnt.amount - contractFees) * rewAgrmnt.ownerRatio )/100;
-            ERC20(rewAgrmnt.erc20).transfer(address(this), ownerFees);
+            IERC20(rewAgrmnt.erc20).transfer(address(this), ownerFees);
         }
     }
     
