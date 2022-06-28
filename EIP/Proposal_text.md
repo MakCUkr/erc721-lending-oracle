@@ -36,7 +36,9 @@ Furthermore, the current contract can be deployed even once for different ERC721
 
 ## Motivation
 
-The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended (which is not so convenient)/ The current specification allows the game devs to deploy a lending "oracle" contract on chain which keeps record of completed lending agreements.
+The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended (which is not so convenient). The current specification allows the game devs to deploy a lending "oracle" contract on chain which keeps record of completed lending agreements.
+
+
 
 ## Specification
 
@@ -88,11 +90,11 @@ Returns the byte representation of the data that must be sent to the current con
 
 The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages.
 
-  
+A diagram on working of an example interaction structure can be found [here]()
+    <!-- ADD IPFS LINK HERE -->
 
 ## Backwards Compatibility
-
-All EIPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The EIP must explain how the author proposes to deal with these incompatibilities. EIP submissions without a sufficient backwards compatibility treatise may be rejected outright.
+<!-- All EIPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The EIP must explain how the author proposes to deal with these incompatibilities. EIP submissions without a sufficient backwards compatibility treatise may be rejected outright. -->
 
   
 
@@ -109,11 +111,9 @@ An optional section that contains a reference/example implementation that people
   
 
 ## Security Considerations
-
-<!-- All EIPs must contain a section that discusses the security implications/considerations relevant to the proposed change. Include information that might be important for security discussions, surfaces risks and can be used throughout the life cycle of the proposal. E.g. include security-relevant design decisions, concerns, important discussions, implementation-specific guidance and pitfalls, an outline of threats and risks and how they are being addressed. EIP submissions missing the "Security Considerations" section will be rejected. An EIP cannot proceed to status "Final" without a Security Considerations discussion deemed sufficient by the reviewers. -->
 * The ERC721 tokens should be transferred to the contract only with the `safeTransferFrom` function as implemented in [EIP721](https://eips.ethereum.org/EIPS/eip-721).
 * When transferring the token, the bytes argument passed in calldata must be ensured to be in a correct format (as specified by the "oracle" contract to which the ERC721 is being transferred). Note: the `dataEncoder` funciton (if implemented) may be used for a more clear understanding.
-* 
+  
 ## Copyright
 
 Copyright and related rights waived via [CC0](../LICENSE.md).=
