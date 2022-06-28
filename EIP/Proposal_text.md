@@ -71,6 +71,7 @@ SHOULD handle the logic of creating lending agreements whenever an ERC721 is tra
 
 ##### extendAgreement
 
+Returns the new deadline for the mentioned non fungible's lending agreement. 
 OPTIONAL - Should extend the lending agreement. MUST be called only by an the actual owner of the ERC721 (tokenLord).
 
 ``function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public  returns (uint)``
@@ -87,6 +88,13 @@ Returns the address of the renter of a rented ERC721. MUST make sure that the ER
 
 ``function currentRenter(address _contractAddress, uint _tokenId) public  view  returns(address currRenter)``
 
+##### dataEncoder
+
+Returns the byte representation of the data that must be sent to the current contract with the `safeTransferFrom` function. Each contract may have its on implementation of the same. The data may include the information about the deadline of the lending agreement, the address which is renting the token.
+
+``function dataEncoder(address _contractAddress, address _tokenRenter, uint _lendForBlocks) public pure returns(bytes memory)``
+
+
 ## Rationale
 
 The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages.
@@ -101,8 +109,8 @@ All EIPs that introduce backwards incompatibilities must include a section descr
 
 ## Test Cases
 
-Test cases for an implementation are mandatory for EIPs that are affecting consensus changes. If the test suite is too large to reasonably be included inline, then consider adding it as one or more files in `../assets/eip-####/`.
-
+<!-- Test cases for an implementation are mandatory for EIPs that are affecting consensus changes. If the test suite is too large to reasonably be included inline, then consider adding it as one or more files in `../assets/eip-####/`. -->
+Not needed (probably).
   
 
 ## Reference Implementation
@@ -113,10 +121,10 @@ An optional section that contains a reference/example implementation that people
 
 ## Security Considerations
 
-All EIPs must contain a section that discusses the security implications/considerations relevant to the proposed change. Include information that might be important for security discussions, surfaces risks and can be used throughout the life cycle of the proposal. E.g. include security-relevant design decisions, concerns, important discussions, implementation-specific guidance and pitfalls, an outline of threats and risks and how they are being addressed. EIP submissions missing the "Security Considerations" section will be rejected. An EIP cannot proceed to status "Final" without a Security Considerations discussion deemed sufficient by the reviewers.
-
-  
-
+<!-- All EIPs must contain a section that discusses the security implications/considerations relevant to the proposed change. Include information that might be important for security discussions, surfaces risks and can be used throughout the life cycle of the proposal. E.g. include security-relevant design decisions, concerns, important discussions, implementation-specific guidance and pitfalls, an outline of threats and risks and how they are being addressed. EIP submissions missing the "Security Considerations" section will be rejected. An EIP cannot proceed to status "Final" without a Security Considerations discussion deemed sufficient by the reviewers. -->
+* The ERC721 tokens should be transferred to the contract only with the `safeTransferFrom` function as implemented in [EIP721](https://eips.ethereum.org/EIPS/eip-721).
+* When transferring the token, the bytes argument passed in calldata must be ensured to be in a correct format (as specified by the "oracle" contract to which the ERC721 is being transferred). Note: the `dataEncoder` funciton (if implemented) may be used for a more clear understanding.
+* 
 ## Copyright
 
 Copyright and related rights waived via [CC0](../LICENSE.md).=
