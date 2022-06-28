@@ -18,15 +18,18 @@ Note that an EIP number will be assigned by an editor. When opening a pull reque
 The title should be 44 characters or less. It should not repeat the EIP number in title, irrespective of the category.  -->
 ## Abstract
 <!-- Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does. -->
-The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended. The current specification allows the game devs to deploy a lenidng "oracle" contract on chain which keeps record of completed lending agreements. The relevant functions `isCurrentlyRented` , `extendAgreement`, `claimNftBack`, `realOwner` allow the mentioned functionality. The lendng agreement is created by calling `_createLendingAgreement` inside `onERC721Received`, whenever an ERC721 is transferred to the contract by calling `safeTransferFrom`.
+The implementation for this contract allows an owner of a NFT contract to transfer his NFT to the "oracle" contract address by calling `safeTransferFrom` and sending relevant information in the 'bytes' calldata. The contract holds this information in mappings and also stores the deadlines until which a lending contract is valid. The relevant functions `isCurrentlyRented` , `extendAgreement`, `claimNftBack`, `realOwner` allow the mentioned functionality. The game contracts and the games' frontends can read data off the "oracle" and know about the lending agreements. 
+
+Furthermore, the current contract can be deployed even once for different ERC721 contracts since the lending agreements also hold the information about the contract address of ERC721. 
 ## Motivation
-The motivation section should describe the "why" of this EIP. What problem does it solve? Why should someone want to implement this standard? What benefit does it provide to the Ethereum ecosystem? What use cases does this EIP address?
-
+The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended (which is not so convenient)/ The current specification allows the game devs to deploy a lending "oracle" contract on chain which keeps record of completed lending agreements.
 ## Specification
-The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in RFC 2119.
+<!-- The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in RFC 2119. -->
+### NOTES:
+* The boolean false MUST be handled if returned by the `isCurrentlyRented` function. 
 
-The technical specification should describe the syntax and semantics of any new feature. The specification should be detailed enough to allow competing, interoperable implementations for any of the current Ethereum platforms (go-ethereum, parity, cpp-ethereum, ethereumj, ethereumjs, and [others](https://github.com/ethereum/wiki/wiki/Clients)).
-
+Returns whether a certain ERC721 contract is currently rented, and returns who is the renter if True.
+<mark>function isCurrentlyRented(address _contractAddress, uint _tokenId) public view returns(bool, address)</mark>
 ## Rationale
 The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages.
 
