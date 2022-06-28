@@ -1,26 +1,15 @@
 
 ---
-
 eip: <to be assigned>
-
 title: ERC721 Lending Oracle
-
 description: Implementation of an on-chain lending oracle for gaming NFTs
-
 author: Maksimjeet Chowdhary <chowdharymaksimjeet@gmail.com>, Maksimjeet Chowdhary (@MakC-Ukr)
-
 discussions-to: <URL>
-
 status: Draft
-
 type: Standards Track
-
 category (*only required for Standards Track): ERC
-
 created: 2022-06-28
-
 requires (*optional): 721
-
 ---
 
 <!--
@@ -60,39 +49,39 @@ The current specification is a suggested interface for a lending oracle to be im
 ##### isCurrentlyRented
 Returns whether a certain ERC721 contract is currently rented, and returns who is the renter if True.
 
-``function isCurrentlyRented(address _contractAddress, uint _tokenId) public view returns(bool, address)``
+==function isCurrentlyRented(address _contractAddress, uint _tokenId) public view returns(bool, address)==
 
 ##### onERC721Received
 
 Returns The functions selector of `onERC721Received` 
 SHOULD handle the logic of creating lending agreements whenever an ERC721 is transferred using `safeTransferFrom`
 
-``function onERC721Received(address, address from, uint256 tokenId, bytes calldata data ) public override returns (bytes4)``
+==function onERC721Received(address, address from, uint256 tokenId, bytes calldata data ) public override returns (bytes4)==
 
 ##### extendAgreement
 
 Returns the new deadline for the mentioned non fungible's lending agreement. 
 OPTIONAL - Should extend the lending agreement. MUST be called only by an the actual owner of the ERC721 (tokenLord).
 
-``function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public  returns (uint)``
+==function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public  returns (uint)==
 
 ##### realOwner
 
 Returns the address of the actual owner (tokenLord) of a rented ERC721. MUST make sure that the ERC721 is currently rented.
 
-``function realOwner(address _contractAddress, uint _tokenId) public  view  returns(address currOwner)``
+==function realOwner(address _contractAddress, uint _tokenId) public  view  returns(address currOwner)==
 
 ##### currentRenter
 
 Returns the address of the renter of a rented ERC721. MUST make sure that the ERC721 is currently rented.
 
-``function currentRenter(address _contractAddress, uint _tokenId) public  view  returns(address currRenter)``
+==function currentRenter(address _contractAddress, uint _tokenId) public  view  returns(address currRenter)==
 
 ##### dataEncoder
 
 Returns the byte representation of the data that must be sent to the current contract with the `safeTransferFrom` function. Each contract may have its on implementation of the same. The data may include the information about the deadline of the lending agreement, the address which is renting the token.
 
-``function dataEncoder(address _contractAddress, address _tokenRenter, uint _lendForBlocks) public pure returns(bytes memory)``
+==function dataEncoder(address _contractAddress, address _tokenRenter, uint _lendForBlocks) public pure returns(bytes memory)==
 
 
 ## Rationale
