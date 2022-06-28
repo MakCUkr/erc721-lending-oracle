@@ -48,6 +48,8 @@ The current specification is a suggested interface for a lending oracle to be im
 
 * The boolean false MUST be handled if returned by the `isCurrentlyRented` function.
 
+### Functions
+
 ##### isCurrentlyRented
 Returns whether a certain ERC721 contract is currently rented, and returns who is the renter if True.
 
