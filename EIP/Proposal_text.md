@@ -2,13 +2,13 @@
 eip: <to be assigned>
 title: ERC721 Lending Oracle
 description: Implementation of an on-chain lending oracle for gaming NFTs
-author: <a comma separated list of the author's or authors' name + GitHub username (in parenthesis), or name and email (in angle brackets).  Example, FirstName LastName (@GitHubUsername), FirstName LastName <foo@bar.com>, FirstName (@GitHubUsername) and GitHubUsername (@GitHubUsername)>
+author: Maksimjeet Chowdhary <chowdharymaksimjeet@gmail.com>, Maksimjeet Chowdhary (@MakC-Ukr)
 discussions-to: <URL>
 status: Draft
-type: <Standards Track, Meta, or Informational>
-category (*only required for Standards Track): <Core, Networking, Interface, or ERC>
-created: <date created on, in ISO 8601 (yyyy-mm-dd) format>
-requires (*optional): <EIP number(s)>
+type: Standards Track
+category (*only required for Standards Track): ERC
+created: 2022-06-08
+requires (*optional): 721
 ---
 
 
