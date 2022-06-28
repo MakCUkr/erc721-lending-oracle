@@ -1,13 +1,26 @@
 
 ---
 eip: <to be assigned>
-title: ERC721 Lending Oracle
+title: 
 description: Implementation of an on-chain lending oracle for gaming NFTs
 author: Maksimjeet Chowdhary <chowdharymaksimjeet@gmail.com>, Maksimjeet Chowdhary (@MakC-Ukr)
 discussions-to: <URL>
 status: Draft
 type: Standards Track
 category (*only required for Standards Track): ERC
+created: 2022-06-28
+requires (*optional): 721
+---
+
+---
+eip: <to be assigned>
+title: ERC721 Lending Oracle
+description: Implementation of an on-chain lending oracle for gaming NFTs
+author: Maksimjeet Chowdhary <chowdharymaksimjeet@gmail.com>, Maksimjeet Chowdhary (@MakC-Ukr)
+discussions-to: <URL>
+status: Draft
+type: Standards Track
+category: <ERC>
 created: 2022-06-28
 requires (*optional): 721
 ---
