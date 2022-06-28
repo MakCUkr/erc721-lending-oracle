@@ -6,7 +6,7 @@ author: Maksimjeet Chowdhary (chowdharymaksimjeet@gmail.com), Maksimjeet Chowdha
 discussions-to: <URL>
 status: Draft
 type: Standards Track
-category (*only required for Standards Track): ERC
+category: ERC
 created: 2022-06-08
 requires (*optional): 721
 ---
