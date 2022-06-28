@@ -31,15 +31,14 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
     mapping(address => mapping(uint=> LendingAgreement)) allAgreements;
 
 
-    /*
-        @desc Homonymous application
+    /**
+        @dev Returns a boolean value if the NFT is rented currently. If True, returns the address of the renter as the second parameter.
         @param _contractAddress - homonymous
         @param _tokenId - homonymous
-        @return returns : 1. boolean if the mentioned token is rented currently
-                          2. returns the address of the user to which the NFT is rented. 
-                              returns zero address if the token is not rented
+        @return (i) boolean if the mentioned token is rented currently
+        @return (ii) returns the address of the user to which the NFT is rented. returns zero address if the token is not rented
     */
-    function isCurrentlyRented(address _contractAddress, uint _tokenId) public view returns(bool , address){
+    function isCurrentlyRented(address _contractAddress, uint _tokenId) public view returns(bool, address){
         if(_isCurrentlyRented(_contractAddress, _tokenId)){
             return (true, allAgreements[_contractAddress][_tokenId].tokenRenter);
         }

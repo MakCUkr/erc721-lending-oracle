@@ -10,16 +10,15 @@ category (*only required for Standards Track): ERC
 created: 2022-06-28
 requires (*optional): <EIP number(s)>
 ---
-
+<!-- 
 This is the suggested template for new EIPs.
 
 Note that an EIP number will be assigned by an editor. When opening a pull request to submit your EIP, please use an abbreviated title in the filename, `eip-draft_title_abbrev.md`.
 
-The title should be 44 characters or less. It should not repeat the EIP number in title, irrespective of the category. 
-
+The title should be 44 characters or less. It should not repeat the EIP number in title, irrespective of the category.  -->
 ## Abstract
-Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does.
-
+<!-- Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does. -->
+The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended. The current specification allows the game devs to deploy a lenidng "oracle" contract on chain which keeps record of completed lending agreements. The relevant functions `isCurrentlyRented` , `extendAgreement`, `claimNftBack`, `realOwner` allow the mentioned functionality. The lendng agreement is created by calling `_createLendingAgreement` inside `onERC721Received`, whenever an ERC721 is transferred to the contract by calling `safeTransferFrom`.
 ## Motivation
 The motivation section should describe the "why" of this EIP. What problem does it solve? Why should someone want to implement this standard? What benefit does it provide to the Ethereum ecosystem? What use cases does this EIP address?
 
