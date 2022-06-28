@@ -29,7 +29,8 @@ The current specification is a suggested interface for a lending oracle to be im
 * The boolean false MUST be handled if returned by the `isCurrentlyRented` function. 
 
 Returns whether a certain ERC721 contract is currently rented, and returns who is the renter if True.
-<mark>function isCurrentlyRented(address _contractAddress, uint _tokenId) public view returns(bool, address)</mark>
+```function isCurrentlyRented(address _contractAddress, uint _tokenId) public view returns(bool, address)```
+
 ## Rationale
 The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages.
 
