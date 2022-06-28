@@ -73,7 +73,7 @@ SHOULD handle the logic of creating lending agreements whenever an ERC721 is tra
 
 OPTIONAL - Should extend the lending agreement. MUST be called only by an the actual owner of the ERC721 (tokenLord).
 
-``function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public``
+``function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public  returns (uint)``
 
 ##### realOwner
 

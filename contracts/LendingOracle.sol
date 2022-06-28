@@ -135,27 +135,28 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
     }
 
 
-    /*
-        @desc the function is used for extending the agreement for a certain NFT
+    /**
+        @dev the function is used for extending the agreement for a certain NFT
         @param _contractAddress - ERC721 contract address
         @param _tokenId - homonymous
         @param _blocksExtended - number of blocks b which the agreement must be extended
+        @return the new deadline for the provided token.
     */
-    function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public{
+    function extendAgreement(address _contractAddress, uint _tokenId, uint _blocksExtended) public returns (uint){
         require(allAgreements[_contractAddress][_tokenId].deadline > 0, "LendingOracle: Initial lending agreement doesn't exist");
         require(allAgreements[_contractAddress][_tokenId].deadline < block.timestamp, "LendingOracle: Previous agreement not expired");
         require(allAgreements[_contractAddress][_tokenId].tokenLord == _msgSender(), "LendingOracle: The msg sender should either be approved or owner of the token" );
-
         allAgreements[_contractAddress][_tokenId].deadline = block.timestamp + _blocksExtended;
+        return allAgreements[_contractAddress][_tokenId].deadline;
     }
 
-    /*
-        @desc the function that will be called to transfer the NFT back after the agreement has ended
+    /**
+        @dev the function that will be called to transfer the NFT back after the agreement has ended
         @param _contractAddress - self-explanatory
         @param _tokenId - self-explanatory
         Note:  the purpose of "deleting" the agreement is gas refund + gettig rid of the uncertainty in case of new owner after the agreement has ended
     */
-    function claimNftBack(address _contractAddress, uint _tokenId) public
+    function claimBack(address _contractAddress, uint _tokenId) public
     {
         require(_isCurrentlyRented(_contractAddress, _tokenId) == false, "LendingOracle: Previous agreement not expired");
         require(allAgreements[_contractAddress][_tokenId].deadline > 0, "LendingOracle: No agreement in place before this");
