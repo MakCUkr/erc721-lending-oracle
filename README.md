@@ -17,7 +17,7 @@ Assumptions made:
 
 
 
-### Background 
+### Background Research
 1. https://ethereum-magicians.org/t/eip4907-erc-721-user-and-expires-extension/8572
 - Is an extension of IERC721 and hecne requires modification to the ERC721 contract itself
 - Uses a new function `userOf` to differentiate the user form the owner fo the ERC721 contract.
