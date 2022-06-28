@@ -12,18 +12,6 @@ requires (*optional): 721
 ---
 
 
----
-eip: <to be assigned>
-title: <ERC721 Lending Oracle>
-description: <Implementation of an on-chain lending oracle for gaming NFTs>
-author: [Maksimjeet Chowdhary](mailto:chowdharymaksimjeet@gmail.com), [Maksimjeet Chowdhary] (@MakC-Ukr)
-discussions-to: <URL>
-status: Draft
-type: Standards Track
-category: <ERC>
-created: 2022-06-28
-requires (*optional): 721
----
 
 <!--
 
