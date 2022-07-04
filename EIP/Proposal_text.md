@@ -23,11 +23,6 @@ Furthermore, the current contract can be deployed even once for different ERC721
 
 The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended (which is not so convenient). The current specification allows the game devs to deploy a lending "oracle" contract on chain which keeps record of completed lending agreements without changing the core ERC721 contract of the game asset NFTs. 
 
-
-## Specification
-
-<!-- The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”, “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in RFC 2119. -->
-
 ### NOTES:
 
 * The boolean false MUST be handled if returned by the `isCurrentlyRented` function.
