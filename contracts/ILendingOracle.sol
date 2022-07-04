@@ -9,8 +9,8 @@ abstract contract ILendingOracle {
     * @dev is a 
     * @return ret - a bytes representation of the string "is a lending oracle"  
     */
-    function isLendingOracle() external virtual returns (bytes memory ret){
-        return bytes(string("is a lending oracle"));
+    function isLendingOracle() external pure virtual returns (bytes4 ret){
+        return this.isLendingOracle.selector;
     }
 
 }

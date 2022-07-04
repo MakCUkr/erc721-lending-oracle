@@ -214,7 +214,4 @@ contract LendingOracle is IERC721Receiver,Context, AccessControl, ILendingOracle
         }
     }
     */
-    
-
-
 }

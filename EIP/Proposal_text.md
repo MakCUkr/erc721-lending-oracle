@@ -12,33 +12,16 @@ requires (*optional): 721
 ---
 
 
-
-<!--
-
-This is the suggested template for new EIPs.
-
-  
-
-Note that an EIP number will be assigned by an editor. When opening a pull request to submit your EIP, please use an abbreviated title in the filename, `eip-draft_title_abbrev.md`.
-
-  
-
-The title should be 44 characters or less. It should not repeat the EIP number in title, irrespective of the category. -->
-
 ## Abstract
 
-<!-- Abstract is a multi-sentence (short paragraph) technical summary. This should be a very terse and human-readable version of the specification section. Someone should be able to read only the abstract to get the gist of what this specification does. -->
-
-The implementation for this contract allows an owner of a NFT contract to transfer his NFT to the "oracle" contract address by calling `safeTransferFrom` and sending relevant information in the 'bytes' calldata. The contract holds this information in mappings and also stores the deadlines until which a lending contract is valid. The relevant functions `isCurrentlyRented` , `extendAgreement`, `claimNftBack`, `realOwner` allow the mentioned functionality. The game contracts and the games' frontends can read data off the "oracle" and know about the lending agreements.
-
+The implementation for this contract allows an owner of a NFT contract to transfer his NFT to the "oracle" contract address by calling `safeTransfer` (or `safeTransferFrom`) and sending relevant information in the 'bytes' parmaeter as calldata. The contract holds this information in mappings and also stores the deadlines until which a lending contract is valid. The relevant functions `isCurrentlyRented` , `extendAgreement`, `claimNftBack`, `realOwner` allow the mentioned functionality. The game contracts and the games' frontends can read data off the "oracle" and know about the lending agreements.
   
 
 Furthermore, the current contract can be deployed even once for different ERC721 contracts since the lending agreements also hold the information about the contract address of ERC721.
 
 ## Motivation
 
-The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended (which is not so convenient). The current specification allows the game devs to deploy a lending "oracle" contract on chain which keeps record of completed lending agreements.
-
+The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended (which is not so convenient). The current specification allows the game devs to deploy a lending "oracle" contract on chain which keeps record of completed lending agreements without changing the core ERC721 contract of the game asset NFTs. 
 
 
 ## Specification
@@ -88,24 +71,23 @@ Returns the byte representation of the data that must be sent to the current con
 
 ==function dataEncoder(address _contractAddress, address _tokenRenter, uint _lendForBlocks) public pure returns(bytes memory)==
 
+##### isLendingOracle
+
+Returns the selector of the isLendingOracle function itself. Will be used by the gaming contract in order to confirm if the owner of an NFT is a lending oracle. 
+
+==function isLendingOracle() external pure virtual returns (bytes4)==
+
 
 ## Rationale
 
-The rationale fleshes out the specification by describing what motivated the design and why particular design decisions were made. It should describe alternate designs that were considered and related work, e.g. how the feature is supported in other languages.
+The design of the interface was motivated by the requirement of lending agreements to be made possible for ERC721-standard tokens without having to change the code of the Non-fungible Tokens themselves and having cross-contract interoperability of lending protocols. Many ERC721 tokens today have their own lending systems implemented but they lack the generalised approach to solving the problem of lending and borrowing. The current implementation ensures that previosuly deployed games/applications can allow their users to lend/borrow ERC721's by simply tweaking the code in the frontend of the game/application (to check if the owner of the ERC721 is a "Lending Oracle" and take appropriate actions if yes). 
 
-A diagram on working of an example interaction structure can be found [here]()
-    <!-- ADD IPFS LINK HERE -->
+A diagram on working of an example interaction structure can be found [here](https://ibb.co/72RwX5c)
 
 ## Backwards Compatibility
-<!-- All EIPs that introduce backwards incompatibilities must include a section describing these incompatibilities and their severity. The EIP must explain how the author proposes to deal with these incompatibilities. EIP submissions without a sufficient backwards compatibility treatise may be rejected outright. -->
+The ERC standard that we propose does not require the ERC721 standard to implement any new functions. The `safeTransfer` and `safeTransferFrom` functions were present in the [standard implementation])(https://eips.ethereum.org/EIPS/eip-721) put forward by EIP721 in January 2018. The current lending protocol would be compatible with all the ERC721's written as per the standard. 
 
-  
-
-## Test Cases
-
-<!-- Test cases for an implementation are mandatory for EIPs that are affecting consensus changes. If the test suite is too large to reasonably be included inline, then consider adding it as one or more files in `../assets/eip-####/`. -->
-Not needed (probably).
-  
+In use case of gaming especially the issue of backwards compatibility may be benign. Many blockchain-based games have systems of ERC20 token emissions as prizes (incentives) for playing the game. With the added logic of an ERC721 being rented it may be unclear of how the distribution of the ERC20 tokens must be handled. In the Reference Implementation section, we also propose a standard way fo handling ERC20 token rewards, however that method needs to tweak the smart contract of the ERC20 utility (reward) token. If the same is not possible, the games should explicitly discourage users from lending out their ERC721 to some other user using the "Lending oracles" currently being put forward.
 
 ## Reference Implementation
 
@@ -119,4 +101,4 @@ An optional section that contains a reference/example implementation that people
   
 ## Copyright
 
-Copyright and related rights waived via [CC0](../LICENSE.md).=
+Copyright and related rights belong to Maksimjeet Chowdhary (DOB 09.08.2002). For more information contact at [mail](mailto:chowdharymaksimjeet@gmail.com).
