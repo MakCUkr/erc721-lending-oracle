@@ -14,10 +14,10 @@ requires (*optional): 721
 
 ## Abstract
 
-The implementation for this contract allows an owner of a NFT contract to transfer his NFT to the "oracle" contract address by calling `safeTransfer` (or `safeTransferFrom`) and sending relevant information in the 'bytes' parmaeter as calldata. The contract holds this information in mappings and also stores the deadlines until which a lending contract is valid. The relevant functions `isCurrentlyRented` , `extendAgreement`, `claimNftBack`, `realOwner` allow the mentioned functionality. The game contracts and the games' frontends can read data off the "oracle" and know about the lending agreements.
+The implementation for this contract allows an owner of a NFT contract to transfer his NFT to the "oracle" contract address by calling `safeTransfer` (or `safeTransferFrom`) and sending relevant information in the 'bytes' parameter as calldata. The contract holds this information in mappings and also stores the deadlines until which a lending contract is valid. The relevant functions `isCurrentlyRented` , `extendAgreement`, `claimNftBack`, `realOwner` allow the mentioned functionality. The game contracts and the games' frontends can read data off the "oracle" and know about the lending agreements.
   
 
-Furthermore, the current contract can be deployed even once for different ERC721 contracts since the lending agreements also hold the information about the contract address of ERC721.
+Furthermore, the current contract can be deployed only once for different ERC721 contracts since the lending agreements also hold the information about the contract address of ERC721.
 
 ## Motivation
 
@@ -26,6 +26,7 @@ The current specification is a suggested interface for a lending oracle to be im
 ### NOTES:
 
 * The boolean false MUST be handled if returned by the `isCurrentlyRented` function.
+* A lending agreement MUST be created only when an ERC721 is transferred to this Lending Oracle to prevent users from double-lending their NFTs to multiple Lending Oracles
 
 ### Functions
 
@@ -75,7 +76,7 @@ Returns the selector of the isLendingOracle function itself. Will be used by the
 
 ## Rationale
 
-The design of the interface was motivated by the requirement of lending agreements to be made possible for ERC721-standard tokens without having to change the code of the Non-fungible Tokens themselves and having cross-contract interoperability of lending protocols. Many ERC721 tokens today have their own lending systems implemented but they lack the generalised approach to solving the problem of lending and borrowing. The current implementation ensures that previosuly deployed games/applications can allow their users to lend/borrow ERC721's by simply tweaking the code in the frontend of the game/application (to check if the owner of the ERC721 is a "Lending Oracle" and take appropriate actions if yes). 
+The design of the interface was motivated by the requirement of lending agreements to be made possible for ERC721-standard tokens without having to change the code of the Non-fungible Tokens themselves and having cross-contract interoperability of lending protocols. Many ERC721 tokens today have their own lending systems implemented but they lack the generalised approach to solving the problem of lending and borrowing. The current implementation ensures that previously deployed games/applications can allow their users to lend/borrow ERC721's by simply tweaking the code in the frontend of the game/application (to check if the owner of the ERC721 is a "Lending Oracle" and take appropriate actions if yes). 
 
 A diagram on working of an example interaction structure can be found [here](https://ibb.co/72RwX5c)
 
@@ -86,9 +87,7 @@ In use case of gaming especially the issue of backwards compatibility may be ben
 
 ## Reference Implementation
 
-An optional section that contains a reference/example implementation that people can use to assist in understanding or implementing this specification. If the implementation is too large to reasonably be included inline, then consider adding it as one or more files in `../assets/eip-####/`.
-
-  
+A reference implementation (in development) can be found at [https://github.com/MakC-Ukr/erc721-lending-oracle](https://github.com/MakC-Ukr/erc721-lending-oracle). 
 
 ## Security Considerations
 * The ERC721 tokens should be transferred to the contract only with the `safeTransferFrom` function as implemented in [EIP721](https://eips.ethereum.org/EIPS/eip-721).
@@ -96,4 +95,4 @@ An optional section that contains a reference/example implementation that people
   
 ## Copyright
 
-Copyright and related rights belong to Maksimjeet Chowdhary (DOB 09.08.2002). For more information contact at [mail](mailto:chowdharymaksimjeet@gmail.com).
+Copyright and related rights waived via [CC0](/LICENSE).
