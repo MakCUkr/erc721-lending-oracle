@@ -1,21 +1,14 @@
-### Things to do: 
-1. ~~Write logic for isNftContract~~
-2. ~~Function to extend rental~~
-3. ~~function to rent the nft to someone else after the deadline~~
-4. ~~Handling token rewards~~
-5. A proper README.md
-6. ~~currentOwner function~~
-7. need to add events
-8. ~~Create ILendingOracle.sol~~
-9. Add function in Lending oracle to return if this oracle imlpements ILendingOracle.sol. 
-10. It is stupid to ask for calldata from the user as bytes. Encode the data inside the contract only. Ask for normal parameters.
-11. Write tests for the token rewards.
+# ERC721 Lending Oracle
 
-Assumptions made: 
-1. The NFT cannot be transferred back to the owner without deleting the agreement from EVM memory. Otherwise we risk the NFT being sold to some other user, but the tokenLord data doesn't get changed in our mapping.
+The current repository is an implementation of the suggest [EIP1972, submitted on Ethereum Magicians](https://ethereum-magicians.org/t/eip-1972-erc-721-lending-oracle/9901). 
 
+The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended (which is not very convenient for the game developers). The current specification allows the game devs to deploy a lending “oracle” contract on chain which keeps record of completed lending agreements without changing the core ERC721 contract of the game asset NFTs.
 
+### Run tests
 
+Several test are written for the working of the contracts and are in `./test` folder. To run the tests, run the following commands in the root folder:
+1. `npm install`
+2. `npm test`
 
 ### Background Research
 1. https://ethereum-magicians.org/t/eip4907-erc-721-user-and-expires-extension/8572
