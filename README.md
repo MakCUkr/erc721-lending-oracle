@@ -7,7 +7,7 @@ of the game asset NFTs.
 
 ### Pipeline of the model
 
-<img src="./diagram-lendingNft.drawio.svg">
+<img src="./diagram-lendingNft.png">
 
 
 ### Run tests
