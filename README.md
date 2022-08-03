@@ -2,7 +2,13 @@
 
 The current repository is an implementation of the suggest [EIP1972, submitted on Ethereum Magicians](https://ethereum-magicians.org/t/eip-1972-erc-721-lending-oracle/9901). 
 
-The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended (which is not very convenient for the game developers). The current specification allows the game devs to deploy a lending “oracle” contract on chain which keeps record of completed lending agreements without changing the core ERC721 contract of the game asset NFTs.
+The current specification is a suggested interface for a lending oracle to be implemented on chain. Currently, blockchain games utilize ERC721 tokens to represent a hero in the game or other in-game assets. In order to implement possibility for lending, the ERC721 contract has to be amended (which is not very convenient for the game developers). The current specification allows the game devs to deploy a lending “oracle” contract on chain which keeps record of completed lending agreements without changing the core ERC721 contract 
+of the game asset NFTs.
+
+### Pipeline of the model
+
+<img src="./diagram-lendingNft.drawio.svg">
+
 
 ### Run tests
 
